@@ -1,8 +1,11 @@
-
 <?php
-require_once ('koneksi.php');
+require_once 'koneksi.php';
 
 $hasil = mysqli_query($koneksi, "SELECT * FROM anggota ORDER BY id DESC");
+
+if (!$hasil) {
+    die("Query gagal dijalankan: " . mysqli_error($koneksi));
+}
 ?>
 
 <!DOCTYPE html>
@@ -10,38 +13,59 @@ $hasil = mysqli_query($koneksi, "SELECT * FROM anggota ORDER BY id DESC");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Anggota Perpustakaan</title>
+    <title>Data Anggota</title>
 </head>
 <body>
-    <h1>Data Anggota Perpustakaan</h1>
+    <h1>Data Anggota</h1>
 
     <table border="1">
         <thead>
             <tr>
                 <th>No</th>
-                <th>Nomor Anggota</th>
+                <th>No Anggota</th>
                 <th>Nama Lengkap</th>
                 <th>Email</th>
-                <th>Nomor HP</th>
+                <th>No HP</th>
                 <th>Jenis Anggota</th>
                 <th>Alamat</th>
+                <th>Edit</th>
+                <th>Aksi</th>
             </tr>
         </thead>
-
         <tbody>
-            <?php $no = 1; ?>
-            <?php while($row = mysqli_fetch_assoc($hasil)){ ?>
-            <tr>
-                <td><?= $no++; ?></td>
-                <td><?= htmlspecialchars($row['no_anggota']); ?></td>
-                <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
-                <td><?= htmlspecialchars($row['email']); ?></td>
-                <td><?= htmlspecialchars($row['no_hp']); ?></td>
-                <td><?= htmlspecialchars($row['jenis_anggota']); ?></td>
-                <td><?= htmlspecialchars($row['alamat']); ?></td>
-            </tr>
-            <?php }; ?>
+            <?php if (mysqli_num_rows($hasil) > 0): ?>
+                <?php $no = 1; ?>
+                <?php while ($row = mysqli_fetch_assoc($hasil)): ?>
+                    <tr>
+                        <td><?= $no++; ?></td>
+                        <td><?= htmlspecialchars($row['no_anggota'] ?? ''); ?></td>
+                        <td><?= htmlspecialchars($row['nama_lengkap'] ?? ''); ?></td>
+                        <td><?= htmlspecialchars($row['email'] ?? ''); ?></td>
+                        <td><?= htmlspecialchars($row['no_hp'] ?? ''); ?></td>
+                        <td><?= htmlspecialchars($row['jenis_anggota'] ?? ''); ?></td>
+                        <td><?= htmlspecialchars($row['alamat'] ?? ''); ?></td>
+                        <td>
+                            <a href="edit_anggota.php?id=<?= $row['id']; ?>">Edit</a>
+                        </td>
+                        
+                        <td>
+                            <form action="hapus_anggota.php" method="POST" style="display: inline;"
+                                onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                <input type="hidden" name="id" value="<?= $row['id']; ?>">
+                                <button type="submit">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="7">Belum ada data anggota.</td>
+                </tr>
+            <?php endif; ?>
         </tbody>
-    </table>
+    </table><br>
+    <a href="form_anggota.php">
+        <button>Tambah Anggota</button>
+    </a>
 </body>
 </html>
